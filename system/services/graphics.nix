@@ -1,0 +1,8 @@
+{ ... }:
+
+{
+  boot.kernelModules  = [
+    "amdgpu"
+  ];
+  
+}
