@@ -15,8 +15,9 @@
     };
   };
 
-  outputs = { self, nixpkgs, ... }@inputs:
+  outputs = { self, nixpkgs, home-manager, ... }@inputs:
   let
+    lib = nixpkgs.lib;
     system = "x86_64-linux";
     pkgs = import nixpkgs {
       inherit system;
@@ -32,7 +33,7 @@
 
         modules = [
           ./system/configuration.nix
-          ./system/services/
+          ./system/services
         ];
       };
     };

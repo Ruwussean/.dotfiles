@@ -11,6 +11,11 @@
       "video"
     ];
 
-    shell = pkgs.bash;
+    shell = pkgs.fish;
+    packages = [
+      pkgs.fish
+    ];
+
   };
 }
+

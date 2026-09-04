@@ -4,7 +4,7 @@
 
 {
   networking = {
-    hostname = "robby-nixos";
+    hostName = "robby-nixos";
     networkmanager.enable = true;
     nameservers = [
       "9.9.9.9"
