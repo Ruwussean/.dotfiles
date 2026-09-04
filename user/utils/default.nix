@@ -1,23 +1,16 @@
 { pkgs, ... }:
 
 {
-  programs.vscode = {
-    enable = true;
-    profiles = {
-      default = {
-        extensions = with pkgs.vscode-extensions; [
-          ms-python.python
-        ];
-      };
-    };
-  };
+  imports = [ 
+    ./vscode.nix
+  ];
 
   programs.git.enable = true;
 
   programs.fish.enable = true;
 
   home.packages = [
-    nano	
+    pkgs.nano	
   ];
 
 }
