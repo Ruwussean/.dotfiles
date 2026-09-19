@@ -1,64 +1,65 @@
-{
-  pkgs,
-  lib,
-  ...
-}:
+{ pkgs, ... }:
 
 let
   pname = "duckstation";
-  version = "0.0.27";
+  version = "0.1-11826";
 
   src = pkgs.fetchurl {
-    url = "https://github.com/stenzek/duckstation/releases/download/latest/DuckStation-x64.AppImage";
-    sha256 = "sha256:c2fd26257ac5cfefe4f77b61b04b8fe299f9c4e0cf6b851fc5259c815979466a";
+    url = "https://github.com/stenzek/duckstation/releases/download/v${version}/DuckStation-x64.AppImage";
+    hash = "sha256-xcip3k38EOeUE33Li6uXYMpXjfKqe+jBIVFxvru6WWU=";
   };
 
-  # Extract the AppImage into the nix store.
-  extracted = pkgs.appimageTools.extract { inherit pname src version; };
+  extracted = pkgs.appimageTools.extract { inherit pname version src; };
 
-  # FHS env so Electron + bundled libs find a normal /usr/lib style tree.
-  fhsEnv = pkgs.buildFHSEnv {
-    name = "duckstation-fhs";
+  libs = pkgs.lib.makeLibraryPath (with pkgs; [
+    libglvnd
+    libx11
+    libxext
+    libxrender
+    libxi
+    libxcursor
+    libxrandr
+    libxcb
+    libxkbcommon
+    wayland
+    fontconfig
+    freetype
+    gmp
+    libgpg-error
+    e2fsprogs
+    alsa-lib
+    libpulseaudio
+    stdenv.cc.cc.lib
+  ]);
 
-    targetPkgs = pkgs: with pkgs; [
-      fuse
-      glib
-      zlib
-      libGL
-      libxkbcommon
-      xorg.libX11
-      xorg.libXext
-      xorg.libXrender
-      xorg.libXi
-      xorg.libXcursor
-      xorg.libXrandr
-      wayland
-    ];
-
-    runScript = "${pkgs.appimage-run}/bin/appimage-run ${duckstation}";
-
-  };
+  # AppImage binaries use /lib64/ld-linux, which NixOS refuses; point it at nix glibc.
+  app = pkgs.runCommandLocal "${pname}-app" { nativeBuildInputs = [ pkgs.patchelf ]; } ''
+    cp -a ${extracted} $out
+    chmod u+w $out/usr/bin/duckstation-qt
+    patchelf --set-interpreter ${pkgs.glibc}/lib/ld-linux-x86-64.so.2 $out/usr/bin/duckstation-qt
+  '';
 in
 {
   home.packages = [
     (pkgs.writeShellScriptBin pname ''
-      #!/usr/bin/env bash
-      exec ${fhsEnv}/bin/duckstation
+      export LD_LIBRARY_PATH="${app}/usr/lib:${libs}''${LD_LIBRARY_PATH:+:$LD_LIBRARY_PATH}"
+      export QT_PLUGIN_PATH="${app}/usr/plugins"
+      export XKB_CONFIG_ROOT="${pkgs.xkeyboard-config}/share/X11/xkb"
+      export QT_XKB_CONFIG_ROOT="$XKB_CONFIG_ROOT"
+      exec ${app}/usr/bin/duckstation-qt "$@"
     '')
   ];
 
-  # Desktop entry so it shows up in app launchers, with the real Jagex icon.
-  # (Written directly via home.file because xdg.desktopEntries isn't emitting
-  # files in this setup. Icon points at the PNG extracted from the AppImage.)
   home.file.".local/share/applications/duckstation.desktop".text = ''
     [Desktop Entry]
     Type=Application
-    Name=duckstation
-    Exec=${pname}
+    Name=DuckStation
+    Exec=${pname} %f
+    Icon=${app}/usr/share/icons/hicolor/512x512/apps/org.duckstation.DuckStation.png
     Terminal=false
-    Comment=ps1 emulator
-    Categories=Game;
-    MimeType=x-scheme-handler/rshub;
-    StartupWMClass=duckstation
+    Comment=PlayStation 1 emulator
+    Categories=Game;Emulator;
+    MimeType=application/x-iso9660-image;
+    StartupWMClass=duckstation-qt
   '';
 }
