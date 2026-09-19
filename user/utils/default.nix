@@ -2,6 +2,7 @@
 
 {
   imports = [ 
+    ./btop
     ./vscode.nix
   ];
 

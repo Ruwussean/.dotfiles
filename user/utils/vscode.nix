@@ -45,12 +45,9 @@
 
           vitest.explorer
 
-          vscodevim.vim
-        ] ++ marketplaceExtensions;
+        ];
 
         userSettings = {
-          "vim.useSystemClipboard" = true;
-          "vim.hlsearch" = true;
 
           "workbench.colorTheme" = "Catppuccin Macchiato";
           "workbench.iconTheme" = "catppuccin";

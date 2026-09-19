@@ -10,8 +10,9 @@
     };
 
     zen-browser = {
-      url = "github:omarcresp/zen-browser-flake";
+      url = "github:0xc000022070/zen-browser-flake";
       inputs.nixpkgs.follows = "nixpkgs";
+      inputs.home-manager.follows = "home-manager";
     };
   };
 
@@ -23,6 +24,7 @@
       inherit system;
       config = {
         allowUnfree = true;
+        rocmSupport = true;
       };
     };
 
@@ -38,7 +40,7 @@
       };
     };
 
-    homeConfiguration = {
+    homeConfigurations = {
       robby = home-manager.lib.homeManagerConfiguration {
         inherit pkgs;
 

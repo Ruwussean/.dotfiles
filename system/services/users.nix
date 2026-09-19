@@ -12,10 +12,10 @@
     ];
 
     shell = pkgs.fish;
-    packages = [
-      pkgs.fish
-    ];
 
   };
+
+  programs.fish.enable = true;
+
 }
 
